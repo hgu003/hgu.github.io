@@ -1,11 +1,231 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title></title>
-	</head>
-	<body>
-    Hello World！
-	</body>
-</html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+<style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+        text-align: center;
+    }
 
+    .w {
+        position: relative;
+        display: inline-block;
+        margin-top: 100px;
+    }
+	.w h1{
+		color: white;
+		margin-bottom: 30px;
+	}
+    .box {
+        width: 500px;
+        height: 500px;
+        border: 1px solid #5E5E5E;
+        position: relative;
+        overflow: hidden;
+        background-color: white;
+    }
+
+    .box .fall {
+        position: absolute;
+        top: -300px;
+        left: 0;
+        width: 500px;
+    }
+
+    .box .fall:after {
+        content: '';
+        display: block;
+        clear: both;
+    }
+
+    .box .fall > div {
+        display: flex;
+    }
+
+    .box .fall > div > span {
+        flex: 1;
+        width: 25%;
+        height: 125px;
+        display: inline-block;
+        border: 1px solid #9a9a9a;
+    }
+
+    .box .fall > div > span.active {
+        background-color: #000000;
+    }
+
+    .footer {
+        position: absolute;
+        bottom: -34px;
+        left: 0px;
+        text-align: left;
+        width: 100%;
+    }
+
+    .footer button,
+    input {
+        height: 30px;
+        outline: none;
+        border: 0;
+        vertical-align: top;
+        color: white;
+        font-weight: bold;
+    }
+
+    .footer button {
+        width: 19%;
+        cursor: pointer;
+    }
+
+    #jifen {
+        width: 60%;
+        font-size: 18px;
+        background-color: #5E5E5E;
+    }
+</style>
+<body style="background-color: #000000;">
+<div class="w">
+	<h1>别踩白块！</h1>
+    <div class="box">
+        <div class="fall">
+        </div>
+    </div>
+    <div class="footer">
+        <input type="text" name="" id="jifen" value="0" disabled/>
+        <button class="pause" style="background-color: #79d2d2;">暂停</button>
+        <button class="again" style="background-color: #79d2d2;">从新开始</button>
+    </div>
+</div>
+<script type="text/javascript">
+    function WhiteBlock(speed) {
+        that = this;
+        this.fall = document.querySelector(".fall");	//下落盒子
+        this.jifen = document.querySelector("#jifen");  //分数牌
+        this.pause = document.querySelector(".pause");	//暂停按钮
+        this.again = document.querySelector(".again");	//从新开始按钮
+        this.username = window.prompt('请输入用户名');	//用户名输入框
+        this.speed = speed;								//以多少px下落
+        this.temp = 20;									//定时器下落毫秒数
+        this.fenshu = 0;								//分数
+        this.Init();									//初始化
+    }
+
+    //初始化
+    WhiteBlock.prototype.Init = function () {
+        for (var i = 0; i < 4; i++) {  //打开页面执行创建4*4的格子
+            this.CreateGrid();	//创建格子函数
+        }
+        this.timer = setInterval(that.Animate.bind(that), 30);  //执行下落功能
+        this.fall.addEventListener('click', this.Clickk);		//给父盒子事件委托格子点击事件
+        this.Pause();											//暂停功能
+        this.Again();											//从新开始
+
+    }
+
+    //创建格子函数
+    WhiteBlock.prototype.CreateGrid = function () {
+        var ran = this.Ran(3, 0);				//调用随机功能定义一个随机数
+        var div = document.createElement('div');		//创建一个div
+        div.innerHTML = '<span></span><span></span><span></span><span></span>';		//插入四个格子
+        div.children[ran].classList.add('active');			//随机一个格子添加类名
+        div.children[ran].style.backgroundColor = this.ranColor();		//随机一个格子添加随机颜色
+        that.fall.insertBefore(div, that.fall.children[0]);			//把创建出来的div插入到做动画的盒子
+    }
+
+    //下落动画
+    WhiteBlock.prototype.Animate = function () {
+        that.fall.style.top = that.fall.offsetTop + this.speed + 'px';   //盒子以speed的下落
+        if (this.fall.offsetTop >= 0) {
+            this.CreateGrid();		//盒子距离顶部为0时创建一行新格子
+            this.fall.style.top = -125 + 'px';		//格子从新距离顶部-125px,否则会一直创建格子
+            if (this.fall.children.length > 5) {		//格子的行数大于5时删除最后一行
+                this.fall.lastElementChild.remove();
+            }
+            var last = this.fall.lastElementChild;		//获取最后一行的格子
+            for (var i = 0; i < 4; i++) {		//如果fall距离顶部为0时最后一行的某个格子还有类名，则停止定时器
+                if (last.children[i].classList.contains('active')) {
+                    that.Forbid();						//关闭按钮功能
+                    clearInterval(that.timer);			//清除定时器
+                }
+            }
+        }
+    }
+
+    //事件委托格子点击功能
+    WhiteBlock.prototype.Clickk = function (e) {
+        if (e.target.nodeName = 'span') {		//点击的节点名需是span
+            if (e.target.classList.contains('active')) {		//判断点击的元素有没有active类
+                e.target.classList.remove('active');			//删除active类
+                e.target.style.backgroundColor = 'transparent';		//背景颜色赋为透明
+                if (that.username == 'admin') {					//判断用户名，如果是admin分数以5的倍数增加
+                    that.fenshu += 5;
+                    that.jifen.value = that.fenshu + '分';
+                    that.accelerate(20);
+                } else {										//否则分数1的倍数增加
+                    that.jifen.value = ++that.fenshu + '分';
+                    that.accelerate(5);
+                }
+            } else {											//如果点击的元素没有active类则是白格子
+                clearInterval(that.timer);						//清除定时器
+                that.Forbid();									//禁用按钮
+            }
+        }
+    }
+
+    // 结束游戏后禁止点击
+    WhiteBlock.prototype.Forbid = function () {
+        this.fall.removeEventListener('click', that.Clickk);    //解绑事件委托点击格子功能
+        this.pause.onclick = null;								//禁用暂停按钮
+        alert('你挂了');
+    }
+
+    //点击暂停
+    WhiteBlock.prototype.Pause = function () {
+        var flag = true;				//定义一个临时变量
+        this.pause.onclick = function () {
+            if (flag) {
+                clearInterval(that.timer);
+                this.innerHTML = '开始';
+            } else {
+                that.timer = setInterval(that.Animate.bind(that), that.temp);
+                this.innerHTML = '暂停';
+            }
+            flag = !flag;		//这样可以反复点击
+        }
+    }
+
+    //从新开始
+    WhiteBlock.prototype.Again = function () {
+        this.again.onclick = function () {
+            window.location.reload();		//刷新页面
+        }
+    }
+
+    //随机功能
+    WhiteBlock.prototype.Ran = function (max, min) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+	//当达到一定分数的时候加速
+	WhiteBlock.prototype.accelerate = function (speed) {
+		if (that.fenshu % speed == 0) {		//分数%speed = 0
+			that.temp -= 2;			//下落速度+2
+			clearInterval(that.timer);		//清除定时器
+			that.timer = setInterval(that.Animate.bind(that), that.temp); 	//从新开启新速度的定时器
+		}
+	}
+
+    //随机颜色
+    WhiteBlock.prototype.ranColor = function () {
+        return '#' + Math.random().toString(16).substr(2, 6)
+    }
+
+    //执行构造函数
+    new WhiteBlock(3);
+</script>
+</body>
+</html>
