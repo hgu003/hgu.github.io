@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+
+		.box {
+			width: 500px;
+			height: 500px;
+			border: 1px solid #5E5E5E;
+			margin: 200px auto;
+			position: relative;
+			/* overflow: hidden; */
+		}
+
+		.box .fall {
+			position: absolute;
+			top: -300px;
+			left: 0;
+			width: 500px;
+		}
+
+		.box .fall:after {
+			content: '';
+			display: block;
+			clear: both;
+		}
+
+		.box .fall>div {
+			display: flex;
+		}
+
+		.box .fall>div>span {
+			flex: 1;
+			width: 25%;
+			height: 125px;
+			display: inline-block;
+			border: 1px solid #E5E5E5;
+		}
+
+		.box .fall>div>span.active {
+			background-color: #000000;
+		}
+	</style>
+	<body>
+		<input type="text" name="" id="jifen" value="0" disabled/>
+		<div class="box">
+			<div class="fall">
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			var fall = document.querySelector(".fall");
+			var jifen = document.querySelector("#jifen");
+			var timer = null;
+			var temp = 25;
+			for (var i = 0; i < 4; i++) {
+				fn(function(divs) {
+					fall.appendChild(divs)
+				});
+			}
+
+			function animate(){
+				fall.style.top = fall.offsetTop + 3 + 'px';
+				if (fall.offsetTop >= 0) {
+					fn(function(divs) {
+						fall.insertBefore(divs, fall.children[0]);
+					});
+
+					fall.style.top = -125 + 'px';
+					if (fall.children.length >= 6) {
+						fall.lastElementChild.remove();
+					}
+					if (fall.lastElementChild.className == 'cc') {
+						clearInterval(timer);
+					}
+				}
+			}
+			timer = setInterval(animate,temp)
+
+			fall.addEventListener('click', function(e) {
+				if (e.target.className == 'active') {
+					e.target.classList.remove('active');
+					e.target.parentNode.classList.remove('cc');
+					e.target.style.background = 'transparent';
+					jifen.value++;
+					if(jifen.value % 5 == 0){
+						temp-=2;
+						clearInterval(timer);
+						timer = setInterval(animate,temp)
+					}
+				} else {
+					clearInterval(timer);
+				}
+			})
+
+			function fn(callback) {
+				var divs = document.createElement('div');
+				divs.classList.add('cc');
+				divs.innerHTML = '<span></span><span></span><span></span><span></span>';
+				var rans = ran(divs.children.length - 1, 0)
+				divs.children[rans].className = 'active';
+				divs.children[rans].style.background = ranColor();
+				callback && callback(divs)
+			}
+
+			function ran(max, min) {
+				return Math.floor(Math.random() * (max - min + 1) + min);
+			}
+
+			function ranColor() {
+				return '#' + Math.random().toString(16).substr(2, 6)
+			}
+		</script>
+	</body>
+</html>
+<!-- 				// var divs = document.createElement('div');
+				// divs.classList.add('cc');
+				// divs.innerHTML = '<span></span><span></span><span></span><span></span>';
+				// divs.children[ran(divs.children.length-1,0)].classList.add('active'); -->
