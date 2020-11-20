@@ -1,0 +1,69 @@
+$h:95vh;
+$msgH:5vh;
+*{
+    margin: 0;
+    padding: 0;
+}
+ul{
+    list-style-type: none;
+}
+input,button{
+    outline: none;
+    border: 0;
+}
+
+@mixin float($g:left){
+    float: $g;
+}
+
+@mixin bgColor($color){
+    background: $color;
+}
+
+@mixin Color($c){
+    color: $c;
+}
+
+/* 游戏区 */
+.view{
+    max-width: 768px;
+    min-width: 300px;
+    height: $h;
+    overflow: hidden;
+    >.block{
+          width: 100%;
+          height: 25%;
+          background-color: pink;
+          display: flex;
+          >li{
+            flex: 1;
+            border: 0.5px solid black;
+          }
+    }
+}
+
+/*信息区*/
+.msg{
+    height: $msgH;
+    >input{
+        @include float();
+        @include bgColor(#f66666);
+        @include Color(white);
+        @extend .msg;
+        width: 70%;
+        text-indent: 2em;
+    }
+    >button{
+        @include float(right);
+        @include bgColor(skyblue);
+        @include Color(white);
+        @extend .msg;
+        height: $msgH;
+        width: 30%;
+        letter-spacing: 3px;
+        font:{
+            weight:bold;
+            size: 16px;
+        }
+    }
+}
